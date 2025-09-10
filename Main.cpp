@@ -1,9 +1,14 @@
 #include "Bat.h"
+#include <iostream>
 #include <sstream>
 #include <cstdlib>
 #include <SFML/Graphics.hpp>
+
+using namespace sf;
+
 int main()
 {
+	
 	// Create a video mode object
 	VideoMode vm(1920, 1080);
 	// Create and open a window for the game
@@ -21,6 +26,7 @@ int main()
 
 	// Retro style font
 	Font font;
+	
 	font.loadFromFile("fonts/DS-Digi.ttf");
 
 	// Set the font to our retro font
@@ -33,6 +39,10 @@ int main()
 	hud.setPosition(20, 20);
 	// Here is our clock for timing everything
 	Clock clock;
+
+	// sf:Event event; is used to handle all the different events in the game
+	Event event; 
+
 	while (window.isOpen())
 	{
 		/*
@@ -41,6 +51,35 @@ int main()
 		***********************
 		*/
 
+		while (window.pollEvent(event))
+		{
+			if (event.type == Event::Closed)
+				// Quit the game whent he window is closed
+				window.close();
+		}
+		// Handle the player quitting
+		if (Keyboard::isKeyPressed(Keyboard::Escape))
+		{
+			window.close();
+		}
+		// Handle the pressing and releasing of the arrow keys
+		if (Keyboard::isKeyPressed(Keyboard::Left))
+		{
+			bat.moveLeft();
+		}
+		else
+		{
+			bat.stopLeft();
+		}
+		if (Keyboard::isKeyPressed(Keyboard::Right))
+		{
+			bat.moveRight();
+		}
+		else
+		{
+			bat.stopRight();
+		}
+
 
 
 		/*
@@ -48,6 +87,15 @@ int main()
 		Update the bat, the ball, the HUD
 		*********************************
 		*/
+		
+		// Update the delta time
+		Time dt = clock.restart();
+		bat.update(dt);
+
+		// Update the HUD text
+		std::stringstream ss;
+		ss << "Score: " << score << "   Lives: " << lives;
+		hud.setString(ss.str());
 
 
 
@@ -58,6 +106,11 @@ int main()
 		Draw the bat, the ball, the HUD
 		*******************************
 		*/
+
+		window.clear();
+		window.draw(hud);
+		window.draw(bat.getShape());
+		window.display();
 	}
 	return 0;
 }
