@@ -1,4 +1,5 @@
 #include "Bat.h"
+#include "Ball.h"
 #include <iostream>
 #include <sstream>
 #include <cstdlib>
@@ -19,7 +20,8 @@ int main()
 	// Create a bat at the bottom center of the screen
 	Bat bat(1920 / 2, 1080 - 20);
 
-	// We will add aball in the next lesson
+	// Create a Ball
+	Ball ball(1920 / 2, 0);
 
 	// Create a Text object called HUD
 	Text hud;
@@ -91,12 +93,54 @@ int main()
 		// Update the delta time
 		Time dt = clock.restart();
 		bat.update(dt);
+		ball.update(dt);
 
 		// Update the HUD text
 		std::stringstream ss;
 		ss << "Score: " << score << "   Lives: " << lives;
 		hud.setString(ss.str());
 
+		// Handle ball hitting the bootom
+		if (ball.getPosition().top > window.getSize().y)
+		{
+			// Reverse the ball direction
+			ball.reboundBottom();
+
+			// Remove a life
+			lives--;
+
+			// Check for zero lives
+			if (lives < 1)
+			{
+				// reset the score
+				score = 0;
+				lives = 3;
+			}
+		}
+
+		// Handle ball hitting the top
+		if (ball.getPosition().top < 0)
+		{
+			// Rverse the ball direction
+			ball.reboundBatOrTop();
+
+			// Add a point to the score
+			score++;
+		}
+
+		// Handle ball hitting the sided
+		if (ball.getPosition().left < 0 || ball.getPosition().left + ball.getPosition().width> window.getSize().x)
+		{
+			// Reverse the ball direction
+			ball.reboundSides();
+		}
+
+		// Has the ball hit the bat?
+		if (ball.getPosition().intersects(bat.getPosition()))
+		{
+			// hit detected so reverse the ball and score a point
+			ball.reboundBatOrTop();
+		}
 
 
 
@@ -110,6 +154,7 @@ int main()
 		window.clear();
 		window.draw(hud);
 		window.draw(bat.getShape());
+		window.draw(ball.getShape());
 		window.display();
 	}
 	return 0;
